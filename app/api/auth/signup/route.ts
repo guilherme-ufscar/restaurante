@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs"
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { name, email, password, role } = body
+        const { name, email, password, role, restaurantName } = body
 
         if (!name || !email || !password) {
             return NextResponse.json(
@@ -57,8 +57,10 @@ export async function POST(request: Request) {
 
             // Se for restaurante, criar registro de restaurante
             if (role === "RESTAURANT") {
+                const finalRestaurantName = restaurantName || `Restaurante de ${name}`
+
                 // Gerar slug simples
-                let slug = name
+                let slug = finalRestaurantName
                     .toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "")
@@ -88,9 +90,9 @@ export async function POST(request: Request) {
 
                 await tx.restaurant.create({
                     data: {
-                        name: `Restaurante de ${name}`,
+                        name: finalRestaurantName,
                         slug,
-                        email: email, // Usar mesmo email do usuário inicialmente
+                        email: email,
                         phone: "",
                         ownerId: user.id,
                         categoryId: category.id,

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma"
 import type { NextAuthOptions } from "next-auth"
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(prisma) as any,
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -54,12 +54,22 @@ export const authOptions: NextAuthOptions = {
         signIn: "/auth/signin",
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.id = user.id
                 token.role = user.role
                 token.email = user.email
             }
+
+            if (trigger === "update") {
+                const freshUser = await prisma.user.findUnique({
+                    where: { id: token.id as string }
+                })
+                if (freshUser) {
+                    token.role = freshUser.role
+                }
+            }
+
             return token
         },
         async session({ session, token }) {

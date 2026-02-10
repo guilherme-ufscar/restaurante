@@ -53,22 +53,25 @@ export default async function RestaurantPage(props: PageProps) {
     function serializeProduct(p: any) {
         return {
             ...p,
-            price: serializeDecimal(p.price),
-            discountPrice: p.discountPrice ? serializeDecimal(p.discountPrice) : null,
+            price: p.price ? Number(p.price) : 0,
+            discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
             createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : null,
             updatedAt: p.updatedAt ? new Date(p.updatedAt).toISOString() : null,
         }
     }
 
-    // serializa restaurant (sem objetos complexos)
+    // Separa as relações que contêm objetos complexos para não passá-los "crus" para o cliente
+    const { products, paymentMethods, ...restRestaurant } = restaurant
+
+    // serializa restaurant
     const serializedRestaurant = {
-        ...restaurant,
+        ...restRestaurant,
         createdAt: restaurant.createdAt ? restaurant.createdAt.toISOString() : null,
         updatedAt: restaurant.updatedAt ? restaurant.updatedAt.toISOString() : null,
         // se existirem campos Decimal no restaurant (ex: rating), convertê-los:
         rating: restaurant.rating ? Number(restaurant.rating) : restaurant.rating,
-        deliveryFee: restaurant.deliveryFee ? serializeDecimal(restaurant.deliveryFee) : null,
-        minOrderValue: restaurant.minOrderValue ? serializeDecimal(restaurant.minOrderValue) : null,
+        deliveryFee: restaurant.deliveryFee ? serializeDecimal(restaurant.deliveryFee) : 0,
+        minOrderValue: restaurant.minOrderValue ? serializeDecimal(restaurant.minOrderValue) : 0,
         estimatedDeliveryTime: Number(restaurant.estimatedDeliveryTime),
     }
 

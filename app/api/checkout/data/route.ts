@@ -1,51 +1,75 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions)
-
-        if (!session?.user?.email) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        const { searchParams } = new URL(request.url)
+        const { searchParams } = new URL(req.url)
         const restaurantId = searchParams.get("restaurantId")
 
         if (!restaurantId) {
-            return NextResponse.json({ error: "Restaurant ID required" }, { status: 400 })
+            return new NextResponse("Restaurant ID required", { status: 400 })
         }
 
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-            include: {
-                addresses: true,
-            },
-        })
-
+        // Fetch restaurant details
         const restaurant = await prisma.restaurant.findUnique({
             where: { id: restaurantId },
-            include: {
-                paymentMethods: {
-                    include: {
-                        paymentMethod: true,
-                    },
-                },
-            },
+            select: {
+                deliveryFee: true,
+                estimatedDeliveryTime: true,
+                acceptsDelivery: true,
+                acceptsPickup: true
+            }
         })
 
-        if (!user || !restaurant) {
-            return NextResponse.json({ error: "Data not found" }, { status: 404 })
+        // Fetch payment methods
+        const paymentMethods = await prisma.restaurantPaymentMethod.findMany({
+            where: {
+                restaurantId: restaurantId,
+                isActive: true,
+                paymentMethod: { isActive: true }
+            },
+            include: {
+                paymentMethod: true
+            }
+        })
+
+        const formattedMethods = paymentMethods.map(pm => ({
+            id: pm.paymentMethod.id,
+            name: pm.paymentMethod.name
+        }))
+
+        // Fetch user addresses if logged in
+        let addresses: any[] = []
+        if (session?.user?.id) {
+            const userAddresses = await prisma.address.findMany({
+                where: { userId: session.user.id },
+                orderBy: [
+                    { isDefault: "desc" },
+                    { createdAt: "desc" }
+                ]
+            })
+
+            addresses = userAddresses.map(addr => ({
+                ...addr,
+                latitude: addr.latitude ? Number(addr.latitude) : null,
+                longitude: addr.longitude ? Number(addr.longitude) : null
+            }))
         }
 
         return NextResponse.json({
-            addresses: user.addresses,
-            paymentMethods: restaurant.paymentMethods,
+            restaurant: restaurant ? {
+                ...restaurant,
+                deliveryFee: Number(restaurant.deliveryFee)
+            } : null,
+            paymentMethods: formattedMethods,
+            addresses
         })
+
     } catch (error) {
-        console.error("Checkout Data API Error:", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        console.error("Error fetching checkout data:", error)
+        return new NextResponse("Internal Error", { status: 500 })
     }
 }

@@ -4,8 +4,12 @@ import Link from "next/link"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Store, UtensilsCrossed } from "lucide-react"
+import BannerCarousel from "@/components/features/banner/BannerCarousel"
+import { getBanners } from "@/actions/banner"
 
 export default async function CategoriesPage() {
+    const banners = await getBanners("CATEGORY")
+
     const categories = await prisma.category.findMany({
         where: { isActive: true },
         include: {
@@ -26,6 +30,11 @@ export default async function CategoriesPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <Container>
+                {banners.length > 0 && (
+                    <div className="mb-10">
+                        <BannerCarousel banners={banners} />
+                    </div>
+                )}
                 <div className="space-y-8">
                     {/* Header */}
                     <div className="text-center mb-8">

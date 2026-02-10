@@ -12,8 +12,17 @@ import { Toaster } from "react-hot-toast"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-    title: "DeliveryApp - Peça comida online",
-    description: "A melhor plataforma de delivery de comida da sua cidade",
+    title: {
+        template: "%s | DeliveryPlatform",
+        default: "DeliveryPlatform - Seu Delivery Favorito",
+    },
+    description: "A melhor plataforma de delivery para restaurantes e clientes. Peça agora!",
+    openGraph: {
+        type: "website",
+        locale: "pt_BR",
+        url: process.env.NEXT_PUBLIC_APP_URL,
+        siteName: "DeliveryPlatform",
+    },
 }
 
 export default async function RootLayout({

@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react"
+import Image from "next/image"
+import { Facebook, Instagram, Mail, Phone } from "lucide-react"
 import Container from "./Container"
 
 export default function Footer() {
@@ -9,20 +10,43 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
                     {/* Sobre */}
                     <div>
-                        <h3 className="text-white font-bold text-lg mb-4">DeliveryApp</h3>
+                        <div className="mb-4">
+                            <Image
+                                src="/logos/logo.webp"
+                                alt="DeliveryApp Logo"
+                                width={150}
+                                height={50}
+                                className="object-contain h-12 w-auto"
+                            />
+                        </div>
                         <p className="text-sm mb-4">
                             Peça comida dos melhores restaurantes da sua cidade com entrega rápida e segura.
                         </p>
                         <div className="flex gap-4">
-                            <div className="hover:text-white transition-colors cursor-pointer">
+                            <a
+                                href="https://www.facebook.com/share/1EMqDbo5h8/?mibextid=wwXIfr"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-white transition-colors cursor-pointer"
+                            >
                                 <Facebook className="h-5 w-5" />
-                            </div>
-                            <div className="hover:text-white transition-colors cursor-pointer">
+                            </a>
+                            <a
+                                href="https://www.instagram.com/ilicinea.com_oficial?igsh=MTk0Z3EyYzdkODRkag%3D%3D&utm_source=qr"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-white transition-colors cursor-pointer"
+                            >
                                 <Instagram className="h-5 w-5" />
-                            </div>
-                            <div className="hover:text-white transition-colors cursor-pointer">
-                                <Twitter className="h-5 w-5" />
-                            </div>
+                            </a>
+                            <a
+                                href="https://wa.me/5535984570053?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Vim%20pelo%20site%20Ilic%C3%ADnea.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-white transition-colors cursor-pointer"
+                            >
+                                <Phone className="h-5 w-5" />
+                            </a>
                         </div>
                     </div>
 
@@ -33,8 +57,6 @@ export default function Footer() {
                             {[
                                 { label: "Sobre", href: "/about" },
                                 { label: "Como Funciona", href: "/how-it-works" },
-                                { label: "Restaurantes Parceiros", href: "/partners" },
-                                { label: "Trabalhe Conosco", href: "/careers" },
                             ].map((link) => (
                                 <Link
                                     key={link.href}
@@ -44,6 +66,12 @@ export default function Footer() {
                                     {link.label}
                                 </Link>
                             ))}
+                            <Link
+                                href="/auth/signup/restaurant"
+                                className="text-sm font-bold text-orange-500 hover:text-orange-400 transition-colors mt-2"
+                            >
+                                Cadastre seu Restaurante
+                            </Link>
                         </nav>
                     </div>
 
@@ -74,15 +102,7 @@ export default function Footer() {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-2">
                                 <Mail className="h-4 w-4" />
-                                <span className="text-sm">contato@deliveryapp.com</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                <span className="text-sm">(11) 9999-9999</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                <span className="text-sm">São Paulo, SP</span>
+                                <span className="text-sm">contato@delivery.ilicinea.com</span>
                             </div>
                         </div>
                     </div>
@@ -90,7 +110,7 @@ export default function Footer() {
 
                 <div className="border-t border-gray-800 py-6 mt-8">
                     <p className="text-center text-sm">
-                        Copyright © 2025 DeliveryApp. Todos os direitos reservados.
+                        Copyright © 2026 <a href="https://www.codermaster.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Coder Master</a>. Todos os direitos reservados.
                     </p>
                 </div>
             </Container>

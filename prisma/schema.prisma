@@ -25,6 +25,7 @@ enum SubscriptionStatus {
   ACTIVE
   EXPIRED
   CANCELLED
+  PAYMENT_FAILED
 }
 
 enum PlanInterval {
@@ -73,6 +74,7 @@ model User {
   orders     Order[]
   restaurant Restaurant?
   reviews    Review[]
+  favorites  Favorite[]
 }
 
 model Account {
@@ -136,6 +138,7 @@ model Category {
   name        String   @unique
   slug        String   @unique
   image       String?
+  icon        String?
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -182,6 +185,7 @@ model Restaurant {
   orders         Order[]
   paymentMethods RestaurantPaymentMethod[]
   reviews        Review[]
+  favorites      Favorite[]
 }
 
 model SubscriptionPlan {
@@ -216,6 +220,50 @@ model Product {
 
   restaurant Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
+  variations ProductVariation[]
+}
+
+model ProductVariation {
+  id          String   @id @default(cuid())
+  productId   String
+  name        String   // Ex: "Tipo de Queijo"
+  required    Boolean  @default(false)
+  multiSelect Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  product Product                  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options ProductVariationOption[]
+}
+
+model ProductVariationOption {
+  id          String  @id @default(cuid())
+  variationId String
+  name        String  // Ex: "Cheddar"
+  price       Decimal @default(0) @db.Decimal(10, 2) // Adicional ao preço base
+
+  variation ProductVariation @relation(fields: [variationId], references: [id], onDelete: Cascade)
+}
+
+model SiteSettings {
+  id              String   @id @default(cuid())
+  siteName        String   @default("DeliveryApp")
+  logo            String?
+  favicon         String?
+  primaryColor    String   @default("#ea580c") // orange-600
+  secondaryColor  String   @default("#dc2626") // red-600
+  footerEmail     String?
+  footerPhone     String?
+  footerAddress   String?
+  footerFacebook  String?
+  footerInstagram String?
+  footerTwitter   String?
+  footerLinkedin  String?
+  stripeProdSecretKey      String?
+  stripeProdPublishableKey String?
+  stripeTestSecretKey      String?
+  stripeTestPublishableKey String?
+  isStripeSandbox          Boolean  @default(true)
+  updatedAt       DateTime @updatedAt
 }
 
 model PaymentMethod {
@@ -294,4 +342,29 @@ model Review {
   order      Order      @relation(fields: [orderId], references: [id])
   user       User       @relation(fields: [userId], references: [id])
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  response   String?    @db.Text
+}
+
+model Favorite {
+  id           String   @id @default(cuid())
+  userId       String
+  restaurantId String
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId])
+}
+
+model Banner {
+  id          String   @id @default(cuid())
+  image       String
+  title       String?  // Opcional
+  description String?  // Opcional
+  link        String?  // Opcional (Link ao clicar)
+  location    String   @default("HOME") // "HOME" ou "CATEGORY"
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -29,6 +29,7 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import AddressModal from "@/components/features/checkout/AddressModal"
+import { createOrder } from "@/actions/order"
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -41,6 +42,7 @@ export default function CheckoutPage() {
     const [orderNotes, setOrderNotes] = useState("")
     const [addresses, setAddresses] = useState<any[]>([])
     const [paymentMethods, setPaymentMethods] = useState<any[]>([])
+    const [restaurantData, setRestaurantData] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
 
@@ -64,16 +66,22 @@ export default function CheckoutPage() {
             const restaurantId = items[0].restaurantId
             const res = await fetch(`/api/checkout/data?restaurantId=${restaurantId}`)
             const data = await res.json()
+
             setAddresses(data.addresses || [])
             setPaymentMethods(data.paymentMethods || [])
+            setRestaurantData(data.restaurant)
+
+            // Set default delivery type based on availability
+            if (data.restaurant) {
+                if (data.restaurant.acceptsDelivery && !data.restaurant.acceptsPickup) {
+                    setDeliveryType("DELIVERY")
+                } else if (!data.restaurant.acceptsDelivery && data.restaurant.acceptsPickup) {
+                    setDeliveryType("PICKUP")
+                }
+            }
+
             if (data.addresses?.length) {
-                // Se já tem um selecionado e ele ainda existe, mantém. Senão pega o default ou o primeiro.
-                // Mas para simplificar conforme pedido:
                 const def = data.addresses.find((a: any) => a.isDefault)
-                // Só muda se não tiver selecionado ou se quiser forçar o default sempre que recarregar (o que pode ser chato se o user acabou de selecionar outro)
-                // O prompt pede: "if (data.addresses?.length) { const def ... setSelectedAddress(...) }"
-                // Vou seguir a lógica do prompt, mas idealmente checaria se selectedAddress ainda é válido.
-                // Como o prompt é imperativo, vou seguir.
                 if (!selectedAddress) {
                     setSelectedAddress(def ? def.id : data.addresses[0].id)
                 }
@@ -113,33 +121,34 @@ export default function CheckoutPage() {
                 items: items.map((item) => ({
                     productId: item.productId,
                     quantity: item.quantity,
-                    price: item.price,
+                    unitPrice: item.price,
+                    totalPrice: item.price * item.quantity,
                     notes: item.notes,
                 })),
-                deliveryType,
-                addressId: selectedAddress || null,
-                paymentMethodId: selectedPaymentMethod,
-                notes: orderNotes,
                 restaurantId: items[0].restaurantId,
+                totalAmount: subtotal,
+                deliveryFee,
+                finalAmount: total,
+                deliveryType: deliveryType as "DELIVERY" | "PICKUP",
+                paymentMethodId: selectedPaymentMethod,
+                addressId: selectedAddress || null,
+                deliveryAddress: deliveryType === "DELIVERY"
+                    ? addresses.find(a => a.id === selectedAddress)
+                        ? `${addresses.find(a => a.id === selectedAddress).street}, ${addresses.find(a => a.id === selectedAddress).number} - ${addresses.find(a => a.id === selectedAddress).neighborhood}, ${addresses.find(a => a.id === selectedAddress).city}/${addresses.find(a => a.id === selectedAddress).state} - CEP: ${addresses.find(a => a.id === selectedAddress).zipCode}`
+                        : null
+                    : null,
+                notes: orderNotes,
             }
 
-            const response = await fetch("/api/orders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(orderData),
-            })
+            const result = await createOrder(orderData)
 
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data.error || data.message || "Erro ao criar pedido")
+            if (!result.success) {
+                throw new Error(result.message || "Erro ao criar pedido")
             }
 
             toast.success("Pedido realizado com sucesso!")
             clearCart()
-            router.push(`/orders/${data.orderId}`)
+            router.push(`/orders/${result.orderNumber}`)
         } catch (error: any) {
             console.error(error)
             toast.error(error.message || "Erro ao finalizar pedido")
@@ -150,7 +159,12 @@ export default function CheckoutPage() {
 
     const subtotal = getTotal()
     const restaurant = items[0] ? { name: items[0].restaurantName, slug: items[0].restaurantSlug } : null
-    const deliveryFee = deliveryType === "DELIVERY" ? 8.90 : 0 // Fixo por enquanto
+
+    // Use dynamic delivery fee
+    const deliveryFee = deliveryType === "DELIVERY"
+        ? (restaurantData?.deliveryFee || 0)
+        : 0
+
     const total = subtotal + deliveryFee
 
     if (!restaurant) return null
@@ -185,42 +199,54 @@ export default function CheckoutPage() {
                                         onValueChange={setDeliveryType}
                                         className="grid grid-cols-1 md:grid-cols-2 gap-4"
                                     >
-                                        <div
-                                            className={`flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition ${deliveryType === "DELIVERY" ? "border-primary bg-primary/5" : ""
-                                                }`}
-                                        >
-                                            <RadioGroupItem value="DELIVERY" id="delivery" />
-                                            <Label htmlFor="delivery" className="flex-1 cursor-pointer">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <Bike className="h-4 w-4" />
-                                                        <span>Entrega no endereço</span>
+                                        {restaurantData?.acceptsDelivery && (
+                                            <div
+                                                onClick={() => setDeliveryType("DELIVERY")}
+                                                className={`flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition ${deliveryType === "DELIVERY" ? "border-primary bg-primary/5" : ""
+                                                    }`}
+                                            >
+                                                <RadioGroupItem value="DELIVERY" id="delivery" />
+                                                <Label htmlFor="delivery" className="flex-1 cursor-pointer">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <Bike className="h-4 w-4" />
+                                                            <span>Entrega no endereço</span>
+                                                        </div>
+                                                        <span className="text-sm text-muted-foreground">
+                                                            R$ {Number(restaurantData?.deliveryFee || 0).toFixed(2)}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-sm text-muted-foreground">
-                                                        R$ {deliveryFee.toFixed(2)}
-                                                    </span>
-                                                </div>
-                                            </Label>
-                                        </div>
+                                                </Label>
+                                            </div>
+                                        )}
 
-                                        <div
-                                            className={`flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition ${deliveryType === "PICKUP" ? "border-primary bg-primary/5" : ""
-                                                }`}
-                                        >
-                                            <RadioGroupItem value="PICKUP" id="pickup" />
-                                            <Label htmlFor="pickup" className="flex-1 cursor-pointer">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <Store className="h-4 w-4" />
-                                                        <span>Retirar no local</span>
+                                        {restaurantData?.acceptsPickup && (
+                                            <div
+                                                onClick={() => setDeliveryType("PICKUP")}
+                                                className={`flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition ${deliveryType === "PICKUP" ? "border-primary bg-primary/5" : ""
+                                                    }`}
+                                            >
+                                                <RadioGroupItem value="PICKUP" id="pickup" />
+                                                <Label htmlFor="pickup" className="flex-1 cursor-pointer">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <Store className="h-4 w-4" />
+                                                            <span>Retirar no local</span>
+                                                        </div>
+                                                        <span className="text-sm text-green-600 font-medium">
+                                                            Grátis
+                                                        </span>
                                                     </div>
-                                                    <span className="text-sm text-green-600 font-medium">
-                                                        Grátis
-                                                    </span>
-                                                </div>
-                                            </Label>
-                                        </div>
+                                                </Label>
+                                            </div>
+                                        )}
                                     </RadioGroup>
+
+                                    {!restaurantData?.acceptsDelivery && !restaurantData?.acceptsPickup && (
+                                        <div className="text-red-500 text-sm mt-2">
+                                            Este restaurante não está aceitando pedidos no momento.
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
 
@@ -315,8 +341,7 @@ export default function CheckoutPage() {
                                                             <div className="flex items-center gap-3">
                                                                 <RadioGroupItem value={pm.id} id={pm.id} />
                                                                 <div>
-                                                                    <div className="font-medium">{pm.paymentMethod.name}</div>
-                                                                    {/* pm.description não existe no tipo inferido, mas vou deixar conforme prompt se existir no backend */}
+                                                                    <div className="font-medium">{pm.name}</div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -436,7 +461,7 @@ export default function CheckoutPage() {
                                             className="w-full"
                                             size="lg"
                                             onClick={handlePlaceOrder}
-                                            disabled={isLoading}
+                                            disabled={isLoading || (!restaurantData?.acceptsDelivery && !restaurantData?.acceptsPickup)}
                                         >
                                             {isLoading
                                                 ? "Finalizando..."

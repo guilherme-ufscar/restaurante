@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -15,13 +15,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast, Toaster } from "react-hot-toast"
 import { UserPlus, Info } from "lucide-react"
@@ -31,9 +24,22 @@ export default function SignUpPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [userType, setUserType] = useState("USER")
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const type = searchParams.get("type")
+    const planId = searchParams.get("plan")
+
+    useEffect(() => {
+        if (type === "restaurant") {
+            const url = planId ? `/auth/signup/restaurant?plan=${planId}` : "/auth/signup/restaurant"
+            router.push(url)
+        }
+    }, [type, planId, router])
+
+    if (type === "restaurant") {
+        return <div className="min-h-screen flex items-center justify-center">Redirecionando...</div>
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -70,7 +76,7 @@ export default function SignUpPage() {
                     name,
                     email,
                     password,
-                    role: userType === "RESTAURANT" ? "RESTAURANT" : "USER",
+                    role: "USER",
                 }),
             })
 
@@ -138,28 +144,6 @@ export default function SignUpPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="userType">Tipo de Conta</Label>
-                                <Select value={userType} onValueChange={setUserType}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o tipo de conta" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="USER">Cliente - Fazer pedidos</SelectItem>
-                                        <SelectItem value="RESTAURANT">Restaurante - Vender produtos</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {userType === "RESTAURANT" && (
-                                <Alert className="bg-blue-50 text-blue-800 border-blue-200">
-                                    <Info className="h-4 w-4" />
-                                    <AlertDescription>
-                                        Sua conta de restaurante precisará ser aprovada pelo administrador antes de começar a vender.
-                                    </AlertDescription>
-                                </Alert>
-                            )}
-
-                            <div className="space-y-2">
                                 <Label htmlFor="password">Senha</Label>
                                 <Input
                                     id="password"
@@ -199,6 +183,14 @@ export default function SignUpPage() {
                                 className="font-medium text-primary hover:underline ml-1"
                             >
                                 Entrar
+                            </Link>
+                        </div>
+                        <div className="text-center text-sm">
+                            <Link
+                                href="/auth/signup/restaurant"
+                                className="text-orange-600 hover:text-orange-700 font-medium"
+                            >
+                                Você é um restaurante? Cadastre-se aqui
                             </Link>
                         </div>
                         <div className="text-center">
