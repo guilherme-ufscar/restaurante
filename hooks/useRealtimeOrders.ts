@@ -94,7 +94,6 @@ export function useRealtimeOrders(restaurantId: string): UseRealtimeOrdersReturn
                                     badge: '/icon.png',
                                     tag: 'new-order-' + Date.now(),
                                     requireInteraction: true,
-                                    vibrate: [200, 100, 200],
                                 })
 
                                 notification.onclick = () => {

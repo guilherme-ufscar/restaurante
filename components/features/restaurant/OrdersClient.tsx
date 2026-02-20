@@ -96,25 +96,21 @@ export default function OrdersClient({ initialOrders, counts, restaurantId, rest
     const [isPending, startTransition] = useTransition()
 
     // Realtime Orders Hook
-    const { newOrdersCount, resetCount } = useRealtimeOrders({
-        restaurantId,
-        initialOrders,
-        enabled: true
-    })
+    const { newOrders, clearNewOrders } = useRealtimeOrders(restaurantId)
 
     // Efeito para atualizar timestamp quando houver novos pedidos
     useEffect(() => {
-        if (newOrdersCount > 0) {
+        if (newOrders.length > 0) {
             setLastUpdated(new Date())
             // O hook já faz o refresh e toca o som
 
             // Resetar contador visual após um tempo se desejar, 
             // ou manter até o usuário interagir. 
             // Aqui vamos resetar após 10s para não ficar piscando para sempre
-            const timer = setTimeout(() => resetCount(), 10000)
+            const timer = setTimeout(() => clearNewOrders(), 10000)
             return () => clearTimeout(timer)
         }
-    }, [newOrdersCount, resetCount])
+    }, [newOrders, clearNewOrders])
 
     const handleRefresh = () => {
         startTransition(() => {
@@ -155,9 +151,9 @@ export default function OrdersClient({ initialOrders, counts, restaurantId, rest
                     <p className="text-muted-foreground flex items-center gap-2">
                         <RefreshCw className={`h-3 w-3 ${isPending ? "animate-spin" : ""}`} />
                         Atualizado {formatDistanceToNow(lastUpdated, { locale: ptBR, addSuffix: true })}
-                        {newOrdersCount > 0 && (
+                        {newOrders.length > 0 && (
                             <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 animate-pulse">
-                                {newOrdersCount} novos pedidos!
+                                {newOrders.length} novos pedidos!
                             </span>
                         )}
                     </p>
@@ -421,13 +417,13 @@ function OrderCard({ order, restaurant }: {
                 )}
 
                 {order.status === "READY" && order.deliveryType === "PICKUP" && (
-                    <Button onClick={() => handleAction(() => completeOrder(order.id, true))}>
+                    <Button onClick={() => handleAction(() => completeOrder(order.id))}>
                         <Store className="mr-2 h-4 w-4" /> Cliente Retirou
                     </Button>
                 )}
 
                 {order.status === "DELIVERING" && (
-                    <Button onClick={() => handleAction(() => completeOrder(order.id, true))}>
+                    <Button onClick={() => handleAction(() => completeOrder(order.id))}>
                         <CheckCircle className="mr-2 h-4 w-4" /> Pedido Entregue
                     </Button>
                 )}
