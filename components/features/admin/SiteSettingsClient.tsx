@@ -50,7 +50,6 @@ export default function SiteSettingsClient({ initialSettings }: { initialSetting
             footerFacebook: initialSettings?.footerFacebook || "",
             footerInstagram: initialSettings?.footerInstagram || "",
             footerTwitter: initialSettings?.footerTwitter || "",
-            footerLinkedin: initialSettings?.footerLinkedin || "",
             stripeProdSecretKey: initialSettings?.stripeProdSecretKey || "",
             stripeProdPublishableKey: initialSettings?.stripeProdPublishableKey || "",
             stripeTestSecretKey: initialSettings?.stripeTestSecretKey || "",
@@ -201,10 +200,6 @@ export default function SiteSettingsClient({ initialSettings }: { initialSetting
                         <div className="space-y-2">
                             <Label htmlFor="footerTwitter">Twitter URL</Label>
                             <Input id="footerTwitter" {...form.register("footerTwitter")} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="footerLinkedin">LinkedIn URL</Label>
-                            <Input id="footerLinkedin" {...form.register("footerLinkedin")} />
                         </div>
                     </CardContent>
                 </Card>
