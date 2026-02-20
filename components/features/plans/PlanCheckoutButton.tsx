@@ -39,11 +39,12 @@ export default function PlanCheckoutButton({ planId, isRestaurant, stripePublish
 
             const data = await response.json()
 
-            if (data.isMock && data.url) {
+            if (data.url) {
                 window.location.href = data.url
                 return
             }
-
+            
+            // Fallback in case there is no url (rare)
             const { sessionId } = data
             const key = stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 

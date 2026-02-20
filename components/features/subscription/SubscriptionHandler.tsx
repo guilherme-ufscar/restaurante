@@ -32,8 +32,22 @@ export default function SubscriptionHandler() {
                         throw new Error(error)
                     }
 
-                    const { sessionId } = await response.json()
-                    const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+                    const data = await response.json()
+
+                    if (data.url) {
+                        window.location.href = data.url
+                        return
+                    }
+
+                    const { sessionId } = data
+                    const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+                    if (!key) {
+                        toast.error("Erro de configuração: Chave pública do Stripe não encontrada.", { id: "checkout-loading" })
+                        return
+                    }
+
+                    const stripe = await loadStripe(key)
 
                     if (stripe) {
                         await (stripe as any).redirectToCheckout({ sessionId })
