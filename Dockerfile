@@ -21,7 +21,7 @@ RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
 # Limita RAM do build para não explodir VPS com pouca memória
-ENV NODE_OPTIONS="--max-old-space-size=512"
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 RUN npm run build
 
