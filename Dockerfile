@@ -6,7 +6,6 @@ RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-# ci é mais rápido que install e usa o lock exato
 RUN npm install
 
 # ── Build ─────────────────────────────────────────────────────────────────────
@@ -20,12 +19,11 @@ COPY . .
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
-# Limita RAM do build para não explodir VPS com pouca memória
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 RUN npm run build
 
-# ── Runner (imagem final mínima) ───────────────────────────────────────────────
+# ── Runner ────────────────────────────────────────────────────────────────────
 FROM base AS runner
 RUN apk add --no-cache openssl
 WORKDIR /app
@@ -38,17 +36,15 @@ ENV HOSTNAME="0.0.0.0"
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
+# App standalone
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
-# Copia apenas node_modules necessários para o seed/prisma CLI
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
+# node_modules completo do builder (tem prisma client gerado + CLI)
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 RUN mkdir -p .next && chown nextjs:nodejs .next
 
