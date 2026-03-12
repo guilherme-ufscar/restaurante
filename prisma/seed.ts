@@ -107,10 +107,10 @@ async function main() {
   // Create Restaurant Owner
   const restaurantOwnerPassword = await bcrypt.hash("loja123", 10)
   const restaurantOwner = await prisma.user.upsert({
-    where: { email: "loja@fooddelivery.com" },
+    where: { email: "loja@cliquepede.com" },
     update: {},
     create: {
-      email: "loja@fooddelivery.com",
+      email: "loja@cliquepede.com",
       name: "Dono da Loja",
       password: restaurantOwnerPassword,
       role: "RESTAURANT"
