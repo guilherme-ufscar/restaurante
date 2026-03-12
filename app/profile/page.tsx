@@ -8,7 +8,7 @@ import ProfileAddresses from "@/components/features/profile/ProfileAddresses"
 import { prisma } from "@/lib/prisma"
 
 export const metadata = {
-    title: "Meu Perfil | DeliveryApp",
+    title: "Meu Perfil | CliquePede",
     description: "Gerencie suas informações pessoais.",
 }
 

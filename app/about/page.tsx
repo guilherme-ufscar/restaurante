@@ -2,8 +2,8 @@
 import Container from "@/components/layout/Container"
 
 export const metadata = {
-    title: "Sobre Nós | DeliveryApp",
-    description: "Conheça a história e a missão do DeliveryApp."
+    title: "Sobre Nós | CliquePede",
+    description: "Conheça a história e a missão do CliquePede."
 }
 
 export default function AboutPage() {
@@ -12,7 +12,7 @@ export default function AboutPage() {
             <Container>
                 <div className="max-w-3xl mx-auto space-y-8">
                     <section className="text-center">
-                        <h1 className="text-4xl font-bold mb-4">Sobre o DeliveryApp</h1>
+                        <h1 className="text-4xl font-bold mb-4">Sobre o CliquePede</h1>
                         <p className="text-xl text-muted-foreground">
                             Conectando pessoas a sabores inesquecíveis.
                         </p>
@@ -21,7 +21,7 @@ export default function AboutPage() {
                     <section className="prose prose-orange max-w-none">
                         <h3>Nossa História</h3>
                         <p>
-                            O DeliveryApp nasceu da paixão por gastronomia e tecnologia.
+                            O CliquePede nasceu da paixão por gastronomia e tecnologia.
                             Fundado em 2026, nosso objetivo sempre foi simplificar a forma
                             como as pessoas pedem comida, garantindo que a experiência seja
                             tão prazerosa quanto a refeição em si.
@@ -34,7 +34,7 @@ export default function AboutPage() {
                             tem o poder de unir pessoas e queremos ser a ponte para esses momentos.
                         </p>
 
-                        <h3>Por que escolher o DeliveryApp?</h3>
+                        <h3>Por que escolher o CliquePede?</h3>
                         <ul>
                             <li><strong>Variedade:</strong> Dos melhores restaurantes locais às grandes redes.</li>
                             <li><strong>Rapidez:</strong> Entregas otimizadas para chegar quentinho até você.</li>

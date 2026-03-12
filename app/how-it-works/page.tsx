@@ -3,8 +3,8 @@ import Container from "@/components/layout/Container"
 import { Search, ShoppingCart, Truck, Utensils } from "lucide-react"
 
 export const metadata = {
-    title: "Como Funciona | DeliveryApp",
-    description: "Entenda como é fácil pedir sua comida favorita no DeliveryApp."
+    title: "Como Funciona | CliquePede",
+    description: "Entenda como é fácil pedir sua comida favorita no CliquePede."
 }
 
 export default function HowItWorksPage() {

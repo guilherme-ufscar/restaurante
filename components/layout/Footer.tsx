@@ -13,7 +13,7 @@ export default function Footer() {
                         <div className="mb-4">
                             <Image
                                 src="/logos/logo.webp"
-                                alt="DeliveryApp Logo"
+                                alt="CliquePede Logo"
                                 width={150}
                                 height={50}
                                 className="object-contain h-12 w-auto"
@@ -32,7 +32,7 @@ export default function Footer() {
                                 <Facebook className="h-5 w-5" />
                             </a>
                             <a
-                                href="https://www.instagram.com/ilicinea.com_oficial?igsh=MTk0Z3EyYzdkODRkag%3D%3D&utm_source=qr"
+                                href="https://www.instagram.com/cliquepede.com_oficial"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-white transition-colors cursor-pointer"
@@ -40,7 +40,7 @@ export default function Footer() {
                                 <Instagram className="h-5 w-5" />
                             </a>
                             <a
-                                href="https://wa.me/5535984570053?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Vim%20pelo%20site%20Ilic%C3%ADnea.com"
+                                href="https://wa.me/5535984570053?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Vim%20pelo%20site%20CliquePede.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-white transition-colors cursor-pointer"
@@ -102,7 +102,7 @@ export default function Footer() {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-2">
                                 <Mail className="h-4 w-4" />
-                                <span className="text-sm">contato@delivery.ilicinea.com</span>
+                                <span className="text-sm">contato@cliquepede.com</span>
                             </div>
                         </div>
                     </div>

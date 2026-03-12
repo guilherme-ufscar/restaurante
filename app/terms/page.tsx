@@ -6,7 +6,7 @@ export default function TermsPage() {
                 <p>Última atualização: {new Date().toLocaleDateString('pt-BR')}</p>
 
                 <h2 className="text-xl font-semibold text-gray-900">1. Aceitação dos Termos</h2>
-                <p>Ao acessar e usar o DeliveryPlatform, você concorda em cumprir e ficar vinculado aos seguintes termos e condições de uso.</p>
+                <p>Ao acessar e usar o CliquePede, você concorda em cumprir e ficar vinculado aos seguintes termos e condições de uso.</p>
 
                 <h2 className="text-xl font-semibold text-gray-900">2. Uso da Plataforma</h2>
                 <p>Você concorda em usar a plataforma apenas para fins legais e de maneira que não infrinja os direitos de terceiros ou restrinja o uso da plataforma por outros.</p>
@@ -18,7 +18,7 @@ export default function TermsPage() {
                 <p>Todos os pedidos estão sujeitos à disponibilidade. Os preços e taxas são exibidos claramente antes da confirmação do pedido.</p>
 
                 <h2 className="text-xl font-semibold text-gray-900">5. Propriedade Intelectual</h2>
-                <p>Todo o conteúdo presente na plataforma é propriedade exclusiva do DeliveryPlatform ou de seus licenciadores.</p>
+                <p>Todo o conteúdo presente na plataforma é propriedade exclusiva do CliquePede ou de seus licenciadores.</p>
             </div>
         </div>
     )

@@ -39,7 +39,7 @@ export default function SiteSettingsClient({ initialSettings }: { initialSetting
     const form = useForm<SiteSettingsFormValues>({
         resolver: zodResolver(siteSettingsSchema),
         defaultValues: {
-            siteName: initialSettings?.siteName || "DeliveryApp",
+            siteName: initialSettings?.siteName || "CliquePede",
             logo: initialSettings?.logo || "",
             favicon: initialSettings?.favicon || "",
             primaryColor: initialSettings?.primaryColor || "#ea580c",

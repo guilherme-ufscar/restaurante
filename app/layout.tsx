@@ -13,15 +13,15 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
     title: {
-        template: "%s | DeliveryPlatform",
-        default: "DeliveryPlatform - Seu Delivery Favorito",
+        template: "%s | CliquePede",
+        default: "CliquePede - Seu Delivery Favorito",
     },
     description: "A melhor plataforma de delivery para restaurantes e clientes. Peça agora!",
     openGraph: {
         type: "website",
         locale: "pt_BR",
         url: process.env.NEXT_PUBLIC_APP_URL,
-        siteName: "DeliveryPlatform",
+        siteName: "CliquePede",
     },
 }
 

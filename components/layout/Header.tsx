@@ -104,7 +104,7 @@ export default function Header() {
                             <Link href="/" className="flex items-center gap-2">
                                 <Image
                                     src="/logos/logo.webp"
-                                    alt="DeliveryApp Logo"
+                                    alt="CliquePede Logo"
                                     width={120}
                                     height={40}
                                     className="object-contain h-10 w-auto"

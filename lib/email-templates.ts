@@ -1,7 +1,7 @@
 export const emailTemplates = {
     welcome: (name: string) => `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1>Bem-vindo ao DeliveryApp, ${name}!</h1>
+      <h1>Bem-vindo ao CliquePede, ${name}!</h1>
       <p>Estamos muito felizes em ter você conosco.</p>
       <p>Explore os melhores restaurantes da sua região e faça seu primeiro pedido.</p>
     </div>
