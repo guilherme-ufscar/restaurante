@@ -1,62 +1,59 @@
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+# ── Dependências ──────────────────────────────────────────────────────────────
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm install
+# ci é mais rápido que install e usa o lock exato
+RUN npm ci --prefer-offline
 
-# Rebuild the source code only when needed
+# ── Build ─────────────────────────────────────────────────────────────────────
 FROM base AS builder
+RUN apk add --no-cache openssl
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
 RUN npx prisma generate
 
-# Next.js telemetry is disabled
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
+# Limita RAM do build para não explodir VPS com pouca memória
+ENV NODE_OPTIONS="--max-old-space-size=512"
 
 RUN npm run build
 
-# Production image, copy all the files and run next
+# ── Runner (imagem final mínima) ───────────────────────────────────────────────
 FROM base AS runner
+RUN apk add --no-cache openssl
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-RUN apk add --no-cache openssl
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy ALL node_modules for seeding to work (bcryptjs, tsx, etc.)
-COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Copy prisma folder if you want to run migrations on startup (optional)
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Copia apenas node_modules necessários para o seed/prisma CLI
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
+
+RUN mkdir -p .next && chown nextjs:nodejs .next
 
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD HOSTNAME="0.0.0.0" node server.js
+CMD ["node", "server.js"]
