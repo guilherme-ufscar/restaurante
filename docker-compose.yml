@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: delivery2025
       POSTGRES_DB: delivery_platform
     ports:
-      - "7501:5432"
+      - "30001:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "7500:3000"
+      - "30000:3000"
     environment:
       - DATABASE_URL=postgresql://delivery_admin:delivery2025@db:5432/delivery_platform?schema=public
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
