@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 # ci é mais rápido que install e usa o lock exato
-RUN npm ci --prefer-offline
+RUN npm install
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 FROM base AS builder
