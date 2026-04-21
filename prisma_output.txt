@@ -1,0 +1,35 @@
+npm warn exec The following package was not found and will be installed: prisma@5.22.0
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "delivery_platform", schema "public" at "db:5432"
+
+The database is already in sync with the Prisma schema.
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.11.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+npm notice To update run: npm install -g npm@11.11.0
+npm notice
+   ▲ Next.js 16.0.3
+   - Local:         http://7542c55210bc:3000
+   - Network:       http://7542c55210bc:3000
+
+ ✓ Starting...
+ ✓ Ready in 102ms
+[next-auth][error][NO_SECRET] 
+https://next-auth.js.org/errors#no_secret Please define a `secret` in production. Error [MissingSecretError]: Please define a `secret` in production.
+    at c.assertConfig (.next/server/chunks/ssr/_2580c493._.js:34:11923)
+    at q (.next/server/chunks/ssr/_2580c493._.js:34:17809)
+    at async h (.next/server/chunks/ssr/_2580c493._.js:34:44779)
+    at async u (.next/server/chunks/ssr/[root-of-the-server]__7f165d64._.js:1:16561) {
+  code: 'NO_SECRET'
+}
+ ⨯ Error: There is a problem with the server configuration. Check the server logs for more information.
+    at h (.next/server/chunks/ssr/_2580c493._.js:34:45027)
+    at async u (.next/server/chunks/ssr/[root-of-the-server]__7f165d64._.js:1:16561) {
+  digest: '4074301197'
+}
+prisma:query SELECT "public"."Banner"."id", "public"."Banner"."image", "public"."Banner"."title", "public"."Banner"."description", "public"."Banner"."link", "public"."Banner"."location", "public"."Banner"."active", "public"."Banner"."createdAt", "public"."Banner"."updatedAt" FROM "public"."Banner" WHERE ("public"."Banner"."location" = $1 AND "public"."Banner"."active" = $2) ORDER BY "public"."Banner"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."Category"."id", "public"."Category"."name", "public"."Category"."slug", "public"."Category"."image", "public"."Category"."icon", "public"."Category"."description", "public"."Category"."isActive", "public"."Category"."createdAt", "public"."Category"."updatedAt" FROM "public"."Category" WHERE "public"."Category"."isActive" = $1 ORDER BY "public"."Category"."name" ASC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."SubscriptionPlan"."id", "public"."SubscriptionPlan"."name", "public"."SubscriptionPlan"."description", "public"."SubscriptionPlan"."price", "public"."SubscriptionPlan"."interval"::text, "public"."SubscriptionPlan"."features", "public"."SubscriptionPlan"."maxProducts", "public"."SubscriptionPlan"."maxOrders", "public"."SubscriptionPlan"."isActive", "public"."SubscriptionPlan"."createdAt", "public"."SubscriptionPlan"."updatedAt" FROM "public"."SubscriptionPlan" WHERE "public"."SubscriptionPlan"."isActive" = $1 ORDER BY "public"."SubscriptionPlan"."price" ASC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Restaurant"."id", "public"."Restaurant"."name", "public"."Restaurant"."slug", "public"."Restaurant"."description", "public"."Restaurant"."logo", "public"."Restaurant"."banner", "public"."Restaurant"."email", "public"."Restaurant"."phone", "public"."Restaurant"."ownerId", "public"."Restaurant"."categoryId", "public"."Restaurant"."minOrderValue", "public"."Restaurant"."deliveryFee", "public"."Restaurant"."estimatedDeliveryTime", "public"."Restaurant"."isActive", "public"."Restaurant"."isApproved", "public"."Restaurant"."approvedAt", "public"."Restaurant"."rejectedAt", "public"."Restaurant"."rejectionReason", "public"."Restaurant"."subscriptionStatus"::text, "public"."Restaurant"."subscriptionPlanId", "public"."Restaurant"."subscriptionExpiresAt", "public"."Restaurant"."rating", "public"."Restaurant"."totalReviews", "public"."Restaurant"."opensAt", "public"."Restaurant"."closesAt", "public"."Restaurant"."acceptsPickup", "public"."Restaurant"."acceptsDelivery", "public"."Restaurant"."createdAt", "public"."Restaurant"."updatedAt" FROM "public"."Restaurant" WHERE ("public"."Restaurant"."isActive" = $1 AND "public"."Restaurant"."isApproved" = $2 AND "public"."Restaurant"."subscriptionStatus" = CAST($3::text AS "public"."SubscriptionStatus")) ORDER BY "public"."Restaurant"."rating" DESC, "public"."Restaurant"."totalReviews" DESC LIMIT $4 OFFSET $5
+prisma:query SELECT "public"."Product"."id", "public"."Product"."restaurantId", "public"."Product"."name", "public"."Product"."description", "public"."Product"."image", "public"."Product"."price", "public"."Product"."discountPrice", "public"."Product"."category", "public"."Product"."isAvailable", "public"."Product"."preparationTime", "public"."Product"."createdAt", "public"."Product"."updatedAt" FROM "public"."Product" LEFT JOIN "public"."Restaurant" AS "j1" ON ("j1"."id") = ("public"."Product"."restaurantId") WHERE ("public"."Product"."isAvailable" = $1 AND ("j1"."isActive" = $2 AND "j1"."isApproved" = $3 AND ("j1"."id" IS NOT NULL))) ORDER BY "public"."Product"."createdAt" DESC LIMIT $4 OFFSET $5

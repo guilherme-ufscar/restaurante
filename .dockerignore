@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.env*
+docker-compose*.yml
+prisma_output.txt
+seed_output.txt
+tsc_output.txt
