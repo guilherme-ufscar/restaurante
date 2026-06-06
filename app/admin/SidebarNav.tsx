@@ -10,7 +10,6 @@ import {
     Crown,
     Users,
     ShoppingCart,
-    Wallet,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -64,12 +63,6 @@ export default function AdminSidebarNav({ pendingRestaurantsCount }: AdminSideba
             title: "Pedidos",
             href: "/admin/orders",
             icon: ShoppingCart,
-            exact: false
-        },
-        {
-            title: "Financeiro",
-            href: "/admin/financeiro",
-            icon: Wallet,
             exact: false
         },
     ]

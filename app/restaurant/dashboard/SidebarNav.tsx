@@ -7,10 +7,8 @@ import {
     UtensilsCrossed,
     ShoppingCart,
     Star,
-    CreditCard,
     Settings,
     Crown,
-    Wallet,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -37,13 +35,6 @@ const navItems = [
         title: "Avaliações",
         href: "/restaurant/dashboard/reviews",
         icon: Star,
-        exact: false
-    },
-
-    {
-        title: "Financeiro",
-        href: "/restaurant/dashboard/financeiro",
-        icon: Wallet,
         exact: false
     },
     {

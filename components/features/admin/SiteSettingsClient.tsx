@@ -24,12 +24,6 @@ const siteSettingsSchema = z.object({
     footerFacebook: z.string().optional().nullable(),
     footerInstagram: z.string().optional().nullable(),
     footerTwitter: z.string().optional().nullable(),
-    stripeProdSecretKey: z.string().optional().nullable(),
-    stripeProdPublishableKey: z.string().optional().nullable(),
-    stripeTestSecretKey: z.string().optional().nullable(),
-    stripeTestPublishableKey: z.string().optional().nullable(),
-    isStripeSandbox: z.boolean(),
-    pixFeePerTransaction: z.coerce.number().min(0, "Valor mínimo é R$ 0,00"),
 })
 
 type SiteSettingsFormValues = z.infer<typeof siteSettingsSchema>
@@ -51,12 +45,6 @@ export default function SiteSettingsClient({ initialSettings }: { initialSetting
             footerFacebook: initialSettings?.footerFacebook || "",
             footerInstagram: initialSettings?.footerInstagram || "",
             footerTwitter: initialSettings?.footerTwitter || "",
-            stripeProdSecretKey: initialSettings?.stripeProdSecretKey || "",
-            stripeProdPublishableKey: initialSettings?.stripeProdPublishableKey || "",
-            stripeTestSecretKey: initialSettings?.stripeTestSecretKey || "",
-            stripeTestPublishableKey: initialSettings?.stripeTestPublishableKey || "",
-            isStripeSandbox: initialSettings?.isStripeSandbox !== false,
-            pixFeePerTransaction: Number(initialSettings?.pixFeePerTransaction ?? 1),
         }
     })
 
@@ -206,68 +194,6 @@ export default function SiteSettingsClient({ initialSettings }: { initialSetting
                     </CardContent>
                 </Card>
 
-                <Card className="col-span-1 md:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Pagamentos (Stripe)</CardTitle>
-                        <CardDescription>Configure as chaves de API do Stripe para processar pagamentos.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex items-center space-x-2 border p-4 rounded-md bg-gray-50">
-                            <input
-                                type="checkbox"
-                                id="isStripeSandbox"
-                                className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-600 cursor-pointer"
-                                {...form.register("isStripeSandbox")}
-                            />
-                            <Label htmlFor="isStripeSandbox" className="font-medium cursor-pointer">Ativar Modo Sandbox (Ambiente de Teste)</Label>
-                        </div>
-
-                        <div className="space-y-2 border p-4 rounded-md bg-gray-50">
-                            <Label htmlFor="pixFeePerTransaction">Taxa por Transação PIX (R$)</Label>
-                            <div className="flex items-center gap-2 max-w-xs">
-                                <span className="text-muted-foreground text-sm">R$</span>
-                                <input
-                                    id="pixFeePerTransaction"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    {...form.register("pixFeePerTransaction")}
-                                />
-                            </div>
-                            <p className="text-xs text-muted-foreground">Valor retido pela plataforma em cada pagamento PIX realizado nos restaurantes.</p>
-                            {form.formState.errors.pixFeePerTransaction && (
-                                <p className="text-sm text-red-500">{form.formState.errors.pixFeePerTransaction.message}</p>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <h3 className="font-semibold text-gray-700 pb-2 border-b">Ambiente de Teste (Sandbox)</h3>
-                                <div className="space-y-2">
-                                    <Label htmlFor="stripeTestSecretKey">Chave Secreta (Teste)</Label>
-                                    <Input id="stripeTestSecretKey" type="password" placeholder="sk_test_..." {...form.register("stripeTestSecretKey")} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="stripeTestPublishableKey">Chave Pública (Teste)</Label>
-                                    <Input id="stripeTestPublishableKey" placeholder="pk_test_..." {...form.register("stripeTestPublishableKey")} />
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="font-semibold text-gray-700 pb-2 border-b">Ambiente de Produção (Live)</h3>
-                                <div className="space-y-2">
-                                    <Label htmlFor="stripeProdSecretKey">Chave Secreta (Produção)</Label>
-                                    <Input id="stripeProdSecretKey" type="password" placeholder="sk_live_..." {...form.register("stripeProdSecretKey")} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="stripeProdPublishableKey">Chave Pública (Produção)</Label>
-                                    <Input id="stripeProdPublishableKey" placeholder="pk_live_..." {...form.register("stripeProdPublishableKey")} />
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </form>
     )

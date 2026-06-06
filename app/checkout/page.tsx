@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/contexts/CartContext"
@@ -25,9 +25,6 @@ import {
     Trash2,
     Plus,
     ArrowLeft,
-    Copy,
-    CheckCircle2,
-    Clock,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -48,19 +45,6 @@ export default function CheckoutPage() {
     const [restaurantData, setRestaurantData] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
-
-    // PIX state
-    const [pixData, setPixData] = useState<{
-        paymentIntentId: string
-        pixCode: string
-        qrCodeUrl: string
-        expiresAt: string
-        orderId: string
-        orderNumber: string
-    } | null>(null)
-    const [pixStatus, setPixStatus] = useState<"PENDING" | "PAID" | "EXPIRED" | "FAILED">("PENDING")
-    const [pixCopied, setPixCopied] = useState(false)
-    const pollingRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -120,39 +104,6 @@ export default function CheckoutPage() {
         updateQuantity(productId, newQuantity)
     }
 
-    const selectedPm = paymentMethods.find((pm: any) => pm.id === selectedPaymentMethod)
-    const isPix = selectedPm?.name?.toLowerCase().includes("pix")
-
-    const startPixPolling = (paymentIntentId: string, orderNum: string) => {
-        pollingRef.current = setInterval(async () => {
-            try {
-                const res = await fetch(`/api/pix/status/${paymentIntentId}`)
-                const data = await res.json()
-                if (data.status === "PAID") {
-                    setPixStatus("PAID")
-                    clearInterval(pollingRef.current!)
-                    toast.success("Pagamento PIX confirmado!")
-                    clearCart()
-                    setTimeout(() => router.push(`/orders/${orderNum}`), 2000)
-                } else if (data.status === "EXPIRED" || data.status === "FAILED") {
-                    setPixStatus(data.status)
-                    clearInterval(pollingRef.current!)
-                }
-            } catch (_) {}
-        }, 5000)
-    }
-
-    useEffect(() => {
-        return () => { if (pollingRef.current) clearInterval(pollingRef.current) }
-    }, [])
-
-    const handleCopyPix = () => {
-        if (!pixData?.pixCode) return
-        navigator.clipboard.writeText(pixData.pixCode)
-        setPixCopied(true)
-        setTimeout(() => setPixCopied(false), 3000)
-    }
-
     const handlePlaceOrder = async () => {
         if (deliveryType === "DELIVERY" && !selectedAddress) {
             toast.error("Selecione um endereço")
@@ -191,33 +142,9 @@ export default function CheckoutPage() {
             const result = await createOrder(orderData)
             if (!result.success) throw new Error(result.message || "Erro ao criar pedido")
 
-            if (isPix) {
-                const pixRes = await fetch("/api/pix/create-payment-intent", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        orderId: result.orderId,
-                        amount: total,
-                        restaurantId: items[0].restaurantId,
-                    }),
-                })
-                const pixJson = await pixRes.json()
-                if (!pixRes.ok) throw new Error(pixJson.error || "Erro ao gerar PIX")
-
-                setPixData({
-                    paymentIntentId: pixJson.paymentIntentId,
-                    pixCode: pixJson.pixCode,
-                    qrCodeUrl: pixJson.qrCodeUrl,
-                    expiresAt: pixJson.expiresAt,
-                    orderId: result.orderId!,
-                    orderNumber: result.orderNumber!,
-                })
-                startPixPolling(pixJson.paymentIntentId, result.orderNumber!)
-            } else {
-                toast.success("Pedido realizado com sucesso!")
-                clearCart()
-                router.push(`/orders/${result.orderNumber}`)
-            }
+            toast.success("Pedido realizado com sucesso!")
+            clearCart()
+            router.push(`/orders/${result.orderNumber}`)
         } catch (error: any) {
             console.error(error)
             toast.error(error.message || "Erro ao finalizar pedido")
@@ -237,85 +164,6 @@ export default function CheckoutPage() {
     const total = subtotal + deliveryFee
 
     if (!restaurant) return null
-
-    if (pixData) {
-        return (
-            <div className="min-h-screen bg-gray-50 py-8">
-                <Container>
-                    <div className="max-w-lg mx-auto">
-                        <Card>
-                            <CardHeader className="text-center">
-                                <CardTitle className="text-2xl">Pague com PIX</CardTitle>
-                                <p className="text-muted-foreground text-sm">
-                                    Escaneie o QR Code ou copie o código abaixo. O pedido será confirmado automaticamente após o pagamento.
-                                </p>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                {pixStatus === "PAID" ? (
-                                    <div className="flex flex-col items-center gap-3 py-8">
-                                        <CheckCircle2 className="h-16 w-16 text-green-500" />
-                                        <p className="text-xl font-bold text-green-600">Pagamento confirmado!</p>
-                                        <p className="text-muted-foreground text-sm">Redirecionando para seu pedido...</p>
-                                    </div>
-                                ) : pixStatus === "EXPIRED" || pixStatus === "FAILED" ? (
-                                    <div className="flex flex-col items-center gap-3 py-8 text-center">
-                                        <p className="text-xl font-bold text-red-500">
-                                            {pixStatus === "EXPIRED" ? "PIX expirado" : "Pagamento falhou"}
-                                        </p>
-                                        <p className="text-muted-foreground text-sm">Por favor, finalize um novo pedido.</p>
-                                        <Button onClick={() => router.push("/")}>Voltar ao início</Button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {pixData.qrCodeUrl && (
-                                            <div className="flex justify-center">
-                                                <img
-                                                    src={pixData.qrCodeUrl}
-                                                    alt="QR Code PIX"
-                                                    className="w-56 h-56 border rounded-lg"
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div className="space-y-2">
-                                            <Label>Código PIX (Copia e Cola)</Label>
-                                            <div className="flex gap-2">
-                                                <div className="flex-1 bg-gray-100 rounded px-3 py-2 text-xs font-mono break-all max-h-20 overflow-y-auto">
-                                                    {pixData.pixCode}
-                                                </div>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={handleCopyPix}
-                                                    className="shrink-0"
-                                                >
-                                                    {pixCopied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
-                                            <Clock className="h-4 w-4" />
-                                            <span>Expira em: {new Date(pixData.expiresAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-                                        </div>
-
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700 text-center">
-                                            Aguardando confirmação do pagamento...
-                                        </div>
-
-                                        <div className="flex justify-between font-bold text-lg pt-2">
-                                            <span>Total a pagar</span>
-                                            <span className="text-primary">R$ {total.toFixed(2)}</span>
-                                        </div>
-                                    </>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                </Container>
-            </div>
-        )
-    }
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">

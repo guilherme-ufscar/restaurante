@@ -543,12 +543,6 @@ const siteSettingsSchema = z.object({
     footerInstagram: z.string().optional().nullable(),
     footerTwitter: z.string().optional().nullable(),
     footerLinkedin: z.string().optional().nullable(),
-    stripeProdSecretKey: z.string().optional().nullable(),
-    stripeProdPublishableKey: z.string().optional().nullable(),
-    stripeTestSecretKey: z.string().optional().nullable(),
-    stripeTestPublishableKey: z.string().optional().nullable(),
-    isStripeSandbox: z.boolean().default(true),
-    pixFeePerTransaction: z.coerce.number().min(0).default(1),
 })
 
 export async function getSiteSettings() {
@@ -594,51 +588,4 @@ export async function updateSiteSettings(data: z.infer<typeof siteSettingsSchema
     }
 }
 
-// --- PIX REPAYMENTS ---
-
-export async function markRepaymentAsPaid(repaymentId: string) {
-    try {
-        const session = await getServerSession(authOptions)
-        if (session?.user.role !== "ADMIN") {
-            return { success: false, message: "Unauthorized" }
-        }
-
-        await prisma.pixRepayment.update({
-            where: { id: repaymentId },
-            data: {
-                isPaid: true,
-                paidAt: new Date(),
-                paidByUserId: session.user.id,
-            },
-        })
-
-        revalidatePath("/admin/financeiro")
-        revalidatePath("/restaurant/dashboard/financeiro")
-        return { success: true }
-    } catch (error) {
-        console.error("Error marking repayment as paid:", error)
-        return { success: false, message: "Erro ao marcar como pago" }
-    }
-}
-
-export async function markRepaymentAsUnpaid(repaymentId: string) {
-    try {
-        const session = await getServerSession(authOptions)
-        if (session?.user.role !== "ADMIN") {
-            return { success: false, message: "Unauthorized" }
-        }
-
-        await prisma.pixRepayment.update({
-            where: { id: repaymentId },
-            data: { isPaid: false, paidAt: null, paidByUserId: null },
-        })
-
-        revalidatePath("/admin/financeiro")
-        revalidatePath("/restaurant/dashboard/financeiro")
-        return { success: true }
-    } catch (error) {
-        console.error("Error unmarking repayment:", error)
-        return { success: false, message: "Erro ao desfazer pagamento" }
-    }
-}
 
