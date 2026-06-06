@@ -6,8 +6,8 @@ services:
       POSTGRES_USER: delivery_admin
       POSTGRES_PASSWORD: delivery2025
       POSTGRES_DB: delivery_platform
-    ports:
-      - "30001:5432"
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -21,8 +21,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "30000:3000"
+    expose:
+      - "3000"
     environment:
       - DATABASE_URL=postgresql://delivery_admin:delivery2025@db:5432/delivery_platform?schema=public
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
@@ -40,6 +40,16 @@ services:
       resources:
         limits:
           memory: 512M
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "10214:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
